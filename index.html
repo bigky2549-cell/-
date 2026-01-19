@@ -3,266 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cyber-Secure ESP8266</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  
+  <title>Security Terminal</title>
   <style>
-    :root {
-      --bg-color: #080a0f;
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --accent-red: #ff4d4d;
-      --accent-green: #00f2ff; /* เปลี่ยนเป็นสี Cyan เพื่อความล้ำ */
-      --text-main: #e0e0e0;
-    }
-
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Segoe UI', Roboto, sans-serif;
-      background: radial-gradient(circle at center, #1a1f35 0%, #080a0f 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      overflow: hidden;
+      margin: 0; min-height: 100vh;
+      background: radial-gradient(circle, #1a1f35, #080a0f);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      color: white; overflow: hidden;
     }
-
-    /* พื้นหลังตกแต่งรูปวงกลมเรืองแสง */
-    body::before {
-      content: "";
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: var(--accent-green);
-      filter: blur(150px);
-      opacity: 0.1;
-      z-index: -1;
-      top: 10%;
-      left: 10%;
-    }
-
     .card {
-      background: var(--card-bg);
+      background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      width: 90%;
-      max-width: 420px;
-      padding: 40px 30px;
-      border-radius: 30px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-      text-align: center;
-      position: relative;
+      padding: 40px; border-radius: 30px;
+      width: 320px; text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
-
-    .system-icon {
-      font-size: 50px;
-      margin-bottom: 20px;
-      color: var(--accent-green);
-      filter: drop-shadow(0 0 10px var(--accent-green));
+    .status-badge {
+      font-size: 14px; letter-spacing: 2px;
+      padding: 10px; border-radius: 50px;
+      margin: 20px 0; border: 1px solid #444;
+      transition: 0.5s;
     }
-
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 300;
-    }
-
-    .status-container {
-      margin: 30px 0;
-    }
-
-    #status {
-      font-size: 14px;
-      letter-spacing: 3px;
-      padding: 12px;
-      border-radius: 50px;
-      display: inline-block;
-      width: 180px;
-      border: 1px solid rgba(255,255,255,0.2);
-      transition: all 0.5s ease;
-      position: relative;
-    }
-
-    /* Animation ไฟกะพริบ */
-    .pulse {
-      animation: pulse-animation 2s infinite;
-    }
-
-    @keyframes pulse-animation {
-      0% { box-shadow: 0 0 0 0px rgba(0, 242, 255, 0.4); }
-      100% { box-shadow: 0 0 0 15px rgba(0, 242, 255, 0); }
-    }
-
-    .armed {
-      color: var(--accent-red);
-      border-color: var(--accent-red) !important;
-      text-shadow: 0 0 10px var(--accent-red);
-      animation: pulse-red 2s infinite;
-    }
-
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0px rgba(255, 77, 77, 0.4); }
-      100% { box-shadow: 0 0 0 15px rgba(255, 77, 77, 0); }
-    }
-
-    .disarmed {
-      color: var(--accent-green);
-      border-color: var(--accent-green) !important;
-      text-shadow: 0 0 10px var(--accent-green);
-    }
-
-    .input-group {
-      margin-bottom: 25px;
-      position: relative;
-    }
-
+    .armed { color: #ff4d4d; border-color: #ff4d4d; box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+    .disarmed { color: #00f2ff; border-color: #00f2ff; box-shadow: 0 0 15px rgba(0,242,255,0.3); }
     input {
-      width: 80%;
-      background: rgba(0,0,0,0.3);
-      padding: 12px 20px;
-      border-radius: 12px;
+      width: 100%; background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.1);
-      color: white;
-      text-align: center;
-      font-family: monospace;
-      font-size: 16px;
-      outline: none;
+      padding: 12px; border-radius: 10px;
+      color: #00f2ff; text-align: center; margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%; padding: 15px; margin: 5px 0;
+      border-radius: 12px; border: none; cursor: pointer;
+      font-weight: bold; text-transform: uppercase;
       transition: 0.3s;
     }
-
-    input:focus {
-      border-color: var(--accent-green);
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
-    }
-
-    .btn-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    button {
-      padding: 15px;
-      border-radius: 15px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: all 0.3s;
-      text-transform: uppercase;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .arm-btn {
-      background: rgba(255, 77, 77, 0.1);
-      color: var(--accent-red);
-      border: 1px solid var(--accent-red);
-    }
-
-    .arm-btn:hover {
-      background: var(--accent-red);
-      color: white;
-      box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
-    }
-
-    .disarm-btn {
-      background: rgba(0, 242, 255, 0.1);
-      color: var(--accent-green);
-      border: 1px solid var(--accent-green);
-    }
-
-    .disarm-btn:hover {
-      background: var(--accent-green);
-      color: #000;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-    }
-
+    .btn-arm { background: #ff4d4d; color: white; }
+    .btn-disarm { background: #00f2ff; color: #080a0f; }
     button:active { transform: scale(0.95); }
-
-    .footer {
-      margin-top: 30px;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      opacity: 0.4;
-    }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <div class="system-icon">
-        <i class="fas fa-shield-halved"></i>
-    </div>
-    <h1>Security Terminal</h1>
-
-    <div class="status-container">
-      <div id="status" class="disarmed pulse">
-        SYSTEM DISARMED
-      </div>
-    </div>
-
-    <div class="input-group">
-      <input id="ip" placeholder="0.0.0.0" spellcheck="false">
-    </div>
-
-    <div class="btn-grid">
-      <button class="arm-btn" onclick="sendCommand('arm')">
-        <i class="fas fa-lock"></i>
-        Arm System
-      </button>
-
-      <button class="disarm-btn" onclick="sendCommand('disarm')">
-        <i class="fas fa-lock-open"></i>
-        Disarm
-      </button>
-    </div>
-
-    <div class="footer">
-      Encryption Active • ESP8266 Link
-    </div>
+    <h2 style="font-weight: 300;">TERMINAL v1.0</h2>
+    <div id="status" class="status-badge disarmed">SYSTEM READY</div>
+    
+    <input id="ip" placeholder="ENTER ESP8266 IP">
+    
+    <button class="btn-arm" onclick="send('arm')">Lock / Arm</button>
+    <button class="btn-disarm" onclick="send('disarm')">Unlock / Disarm</button>
   </div>
 
   <script>
-    // ดึงค่า IP เดิมที่เคยพิมพ์ไว้
+    // โหลด IP เดิมที่เคยบันทึกไว้
     window.onload = () => {
-        const savedIP = localStorage.getItem("esp_ip");
-        if (savedIP) document.getElementById("ip").value = savedIP;
-    };
+      const saved = localStorage.getItem("esp_ip");
+      if(saved) document.getElementById("ip").value = saved;
+    }
 
-    function sendCommand(cmd) {
+    function send(cmd) {
       const ip = document.getElementById("ip").value;
-      const statusBox = document.getElementById("status");
-
-      if (!ip) {
-        alert("กรุณาระบุ IP Address");
-        return;
-      }
-
-      localStorage.setItem("esp_ip", ip);
+      const status = document.getElementById("status");
       
-      statusBox.innerText = "CONNECTING...";
+      if(!ip) return alert("Please enter IP");
+      localStorage.setItem("esp_ip", ip); // บันทึก IP
+
+      status.innerText = "WAITING...";
       
-      fetch(`http://${ip}/${cmd}`, { mode: 'no-cors' })
-        .then(() => {
-          if (cmd === "arm") {
-            statusBox.innerText = "SYSTEM ARMED";
-            statusBox.className = "status armed";
+      fetch(`http://${ip}/${cmd}`)
+        .then(res => {
+          if(cmd === 'arm') {
+            status.innerText = "SYSTEM ARMED";
+            status.className = "status-badge armed";
           } else {
-            statusBox.innerText = "SYSTEM DISARMED";
-            statusBox.className = "status disarmed";
+            status.innerText = "SYSTEM DISARMED";
+            status.className = "status-badge disarmed";
           }
         })
-        .catch(() => {
-          statusBox.innerText = "OFFLINE";
-          statusBox.className = "status";
-          alert("ไม่สามารถติดต่อ ESP8266 ได้");
+        .catch(err => {
+          status.innerText = "OFFLINE";
+          status.className = "status-badge";
+          console.error(err);
         });
     }
   </script>
