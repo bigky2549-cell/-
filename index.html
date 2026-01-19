@@ -3,65 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ESP8266 Security System</title>
+  <title>ESP8266 Security</title>
 
   <style>
     body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 50px;
-      background: #f2f2f2;
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
     }
+
+    .card {
+      background: #1f2a40;
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
     h1 {
+      margin-top: 0;
+      font-size: 28px;
       margin-bottom: 10px;
     }
+
     .status {
       font-size: 22px;
-      margin-bottom: 30px;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      background: #555;
+      transition: 0.3s;
     }
-    button {
-      padding: 20px 30px;
-      font-size: 20px;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin: 10px;
+
+    .armed {
+      background: #e74c3c;
     }
-    .arm { background-color: red; }
-    .disarm { background-color: green; }
+
+    .disarmed {
+      background: #2ecc71;
+    }
+
     input {
-      padding: 10px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
       font-size: 16px;
-      width: 220px;
+      margin-bottom: 20px;
       text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 18px;
+      font-size: 20px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 15px;
+      color: white;
+      transition: 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .arm {
+      background: #e74c3c;
+    }
+
+    .disarm {
+      background: #2ecc71;
+    }
+
+    .footer {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
-  <h1>Security System</h1>
 
-  <div class="status" id="status">
-    Status: ไม่ทราบสถานะ
+  <div class="card">
+    <h1>🔐 Security System</h1>
+
+    <div id="status" class="status disarmed">
+      DISARMED
+    </div>
+
+    <input id="ip" placeholder="ESP8266 IP เช่น 192.168.1.50">
+
+    <button class="arm" onclick="sendCommand('arm')">
+      🚨 ARM SYSTEM
+    </button>
+
+    <button class="disarm" onclick="sendCommand('disarm')">
+      ✅ DISARM SYSTEM
+    </button>
+
+    <div class="footer">
+      ESP8266 Web Control
+    </div>
   </div>
-
-  <p>ESP8266 IP Address</p>
-  <input id="ip" placeholder="เช่น 192.168.1.50">
-
-  <br><br>
-
-  <button class="arm" onclick="sendCommand('arm')">
-    ARM (เปิดระบบ)
-  </button>
-
-  <button class="disarm" onclick="sendCommand('disarm')">
-    DISARM (ปิดระบบ)
-  </button>
 
   <script>
     function sendCommand(cmd) {
       const ip = document.getElementById("ip").value;
+      const statusBox = document.getElementById("status");
+
       if (!ip) {
         alert("กรุณาใส่ IP ของ ESP8266");
         return;
@@ -69,15 +128,19 @@
 
       fetch(`http://${ip}/${cmd}`)
         .then(() => {
-          document.getElementById("status").innerText =
-            cmd === "arm"
-              ? "Status: System ARMED"
-              : "Status: System DISARMED";
+          if (cmd === "arm") {
+            statusBox.innerText = "ARMED";
+            statusBox.className = "status armed";
+          } else {
+            statusBox.innerText = "DISARMED";
+            statusBox.className = "status disarmed";
+          }
         })
         .catch(() => {
-          alert("เชื่อมต่อ ESP8266 ไม่ได้");
+          alert("ไม่สามารถเชื่อมต่อ ESP8266");
         });
     }
   </script>
+
 </body>
 </html>
