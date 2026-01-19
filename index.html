@@ -1,0 +1,81 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+
+// ตั้งค่า WiFi
+const char* ssid = "A";
+const char* password = "11111111";
+
+ESP8266WebServer server(80);
+
+// กำหนดขาพิน
+const int pirPin = D5;
+const int buzzerPin = D6;
+
+bool systemArmed = false; // สถานะระบบ (false = ปิด, true = เปิด)
+String statusMsg = "System Disarmed";
+
+void handleRoot() {
+  String html = "<html><head><meta name='viewport' content='width=device-width, initial-scale=1' charset='utf-8'>";
+  html += "<style>body{font-family:sans-serif; text-align:center; padding-top:50px;}";
+  html += ".btn{padding:20px; font-size:20px; color:white; border:none; border-radius:10px; cursor:pointer;}";
+  html += ".on{background-color:red;} .off{background-color:green;}</style></head><body>";
+  html += "<h1>Security System</h1>";
+  html += "<h2>Status: " + statusMsg + "</h2>";
+  html += "<a href='/arm'><button class='btn on'>ARM (เปิดระบบ)</button></a> ";
+  html += "<a href='/disarm'><button class='btn off'>DISARM (ปิดระบบ)</button></a>";
+  html += "</body></html>";
+  server.send(200, "text/html", html);
+}
+
+void handleArm() {
+  systemArmed = true;
+  statusMsg = "System ARMED (Watching...)";
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
+void handleDisarm() {
+  systemArmed = false;
+  statusMsg = "System Disarmed";
+  digitalWrite(buzzerPin, LOW); // ปิดเสียงเมื่อกดปลดล็อก
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(pirPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\nWiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP()); // ดู IP เพื่อเข้าหน้าเว็บที่นี่
+
+  server.on("/", handleRoot);
+  server.on("/arm", handleArm);
+  server.on("/disarm", handleDisarm);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
+
+  if (systemArmed) {
+    int motion = digital_read_PIR(); // อ่านค่าจากเซนเซอร์
+    if (motion == HIGH) {
+      digitalWrite(buzzerPin, HIGH); // เสียงดังถ้าเจอคนเคลื่อนไหว
+      Serial.println("Motion Detected! Alarm ON");
+    }
+  } else {
+    digitalWrite(buzzerPin, LOW); // ปิดเสียงถ้าไม่ได้เปิดระบบ
+  }
+}
+
+int digital_read_PIR() {
+  return digitalRead(pirPin);
+}
